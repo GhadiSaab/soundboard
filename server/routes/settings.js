@@ -101,10 +101,10 @@ router.put('/:key', async (req, res, next) => {
 
     const setting = db.prepare('SELECT * FROM settings WHERE key = ?').get(key);
 
-    // Apply volume immediately if volume setting changed
+    // Update audio player volume if volume setting changed
     if (key === 'volume') {
       const volumeValue = parseInt(value);
-      await audioPlayer.setVolume(volumeValue);
+      audioPlayer.setVolume(volumeValue);
     }
 
     res.json({

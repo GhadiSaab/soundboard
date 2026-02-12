@@ -1,9 +1,21 @@
-const player = require('play-sound')();
+const { execSync } = require('child_process');
 const EventEmitter = require('events');
-const { exec } = require('child_process');
-const { promisify } = require('util');
 
-const execAsync = promisify(exec);
+function detectPlayer() {
+  const preferred = ['ffplay', 'mpg123', 'mplayer', 'mpg321', 'aplay'];
+  for (const p of preferred) {
+    try {
+      execSync(`which ${p}`, { stdio: 'ignore' });
+      return p;
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
+
+const detectedPlayer = detectPlayer();
+const player = require('play-sound')({ player: detectedPlayer });
 
 class AudioPlayer extends EventEmitter {
   constructor() {
@@ -13,88 +25,24 @@ class AudioPlayer extends EventEmitter {
     this.currentProcess = null;
     this.currentSound = null;
     this.isStoppedManually = false;
-    this.currentVolume = 80; // Default volume
-    this.volumeControl = null; // Will be detected on first use
+    this.currentVolume = 80; // Default volume (0-100)
+    this.playerBinary = detectedPlayer;
 
     // Add error handler to prevent unhandled errors
     this.on('error', (err) => {
       console.error('Audio player error:', err);
     });
 
-    // Detect available volume control on startup
-    this.detectVolumeControl();
+    console.log(`🎵 Audio player initialized using ${this.playerBinary || 'auto-detect'}`);
   }
 
   /**
-   * Detect which ALSA volume control is available
-   * @returns {Promise<void>}
-   */
-  async detectVolumeControl() {
-    try {
-      // Try different common controls in order of preference for Raspberry Pi
-      const controlsToTry = [
-        'PCM',           // Digital audio control (common on RPi)
-        'Master',        // Main volume control
-        'Headphone',     // Headphone output
-        'Speaker',       // Speaker output
-        'Digital',       // Alternative digital control
-        'Playback'       // Generic playback control
-      ];
-
-      for (const control of controlsToTry) {
-        try {
-          // Test if this control exists and is writable
-          await execAsync(`amixer sget '${control}' 2>/dev/null`);
-          this.volumeControl = control;
-          console.log(`✓ Volume control detected: ${control}`);
-          return;
-        } catch (err) {
-          // Control not available, try next
-          continue;
-        }
-      }
-
-      console.warn('⚠ No volume control detected. Volume changes may not work.');
-    } catch (err) {
-      console.warn('⚠ Could not detect volume control:', err.message);
-    }
-  }
-
-  /**
-   * Set system volume using amixer
+   * Set playback volume (does not affect system volume)
    * @param {number} volumePercent - Volume level (0-100)
-   * @returns {Promise<void>}
    */
-  async setVolume(volumePercent) {
-    try {
-      this.currentVolume = Math.max(0, Math.min(100, volumePercent));
-
-      // If no control detected yet, try to detect it now
-      if (!this.volumeControl) {
-        await this.detectVolumeControl();
-      }
-
-      if (this.volumeControl) {
-        // Set volume using the detected control
-        const cmd = `amixer sset '${this.volumeControl}' ${this.currentVolume}% unmute 2>&1`;
-        const { stdout, stderr } = await execAsync(cmd);
-
-        // Log success
-        console.log(`♪ Volume set to ${this.currentVolume}% via ${this.volumeControl}`);
-
-        // Also try to unmute if there's a mute switch
-        try {
-          await execAsync(`amixer sset '${this.volumeControl}' unmute 2>/dev/null`);
-        } catch (e) {
-          // Ignore unmute errors - some controls don't have mute
-        }
-      } else {
-        console.warn(`⚠ No volume control available. Volume change to ${this.currentVolume}% skipped.`);
-      }
-    } catch (err) {
-      console.warn(`⚠ Could not set system volume to ${volumePercent}%:`, err.message);
-      // Continue anyway - volume control is optional
-    }
+  setVolume(volumePercent) {
+    this.currentVolume = Math.max(0, Math.min(100, volumePercent));
+    console.log(`♪ Playback volume set to ${this.currentVolume}%`);
   }
 
   /**
@@ -107,7 +55,7 @@ class AudioPlayer extends EventEmitter {
   async play(filePath, mode = 'queue', volume = null) {
     // Set volume if provided
     if (volume !== null) {
-      await this.setVolume(volume);
+      this.setVolume(volume);
     }
 
     if (mode === 'queue') {
@@ -129,7 +77,7 @@ class AudioPlayer extends EventEmitter {
   }
 
   /**
-   * Play a sound immediately
+   * Play a sound immediately with volume control
    * @param {string} filePath - Path to the audio file
    * @returns {Promise<void>}
    */
@@ -141,7 +89,24 @@ class AudioPlayer extends EventEmitter {
 
       this.emit('playing', { filePath });
 
-      this.currentProcess = player.play(filePath, (err) => {
+      // Build volume args for the detected player
+      const playerOptions = {};
+      const vol = this.currentVolume;
+
+      if (this.playerBinary === 'ffplay') {
+        playerOptions.ffplay = ['-volume', vol.toString(), '-nodisp', '-autoexit', '-loglevel', 'quiet'];
+      } else if (this.playerBinary === 'mpg123') {
+        const scaledVol = Math.round((vol / 100) * 32768);
+        playerOptions.mpg123 = ['-f', scaledVol.toString()];
+      } else if (this.playerBinary === 'mplayer') {
+        playerOptions.mplayer = ['-volume', vol.toString()];
+      } else if (this.playerBinary === 'mpg321') {
+        playerOptions.mpg321 = ['-g', vol.toString()];
+      } else if (this.playerBinary === 'afplay') {
+        playerOptions.afplay = ['-v', (vol / 100).toString()];
+      }
+
+      this.currentProcess = player.play(filePath, playerOptions, (err) => {
         const wasStoppedManually = this.isStoppedManually;
 
         this.isPlaying = false;

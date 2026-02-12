@@ -7,6 +7,11 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #297 | 12:05 PM | 🔵 | AudioPlayer controller implements volume control via player-specific arguments | ~445 |
+| #296 | " | 🔴 | Fixed audio player volume control by detecting and using correct player-specific arguments | ~352 |
+| #295 | " | ✅ | Added audio player binary detection and explicit player configuration | ~371 |
+| #293 | 12:03 PM | 🔵 | AudioPlayer implements software volume control for multiple audio backends | ~398 |
+| #279 | 11:49 AM | 🔄 | Volume Control Simplified to Software-Only Implementation | ~352 |
 | #257 | 11:30 AM | 🟣 | Enhanced Volume Control with Dynamic ALSA Control Detection | ~339 |
 | #256 | " | 🟣 | ALSA Volume Control Auto-Detection for Raspberry Pi | ~383 |
 | #230 | 11:19 AM | ✅ | Added System Command Execution Support to Audio Player | ~200 |

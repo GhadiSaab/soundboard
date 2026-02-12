@@ -7,6 +7,7 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #290 | 11:58 AM | 🔵 | Backend returns settings as object instead of array | ~345 |
 | #262 | 11:32 AM | 🟣 | Real-Time Volume Application Through Settings API | ~288 |
 | #261 | " | ✅ | AudioPlayer Imported into Settings Route | ~241 |
 | #233 | 11:21 AM | 🟣 | PIN Authentication API Routes Created | ~300 |

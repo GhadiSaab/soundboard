@@ -124,9 +124,8 @@ async function loadSounds() {
 async function loadVolume() {
   try {
     const data = await API.getSettings();
-    const settings = data.settings || [];
-    const volumeSetting = settings.find(s => s.key === 'volume');
-    const volume = volumeSetting ? parseInt(volumeSetting.value) : 80;
+    const settings = data.settings || {};
+    const volume = settings.volume ? parseInt(settings.volume) : 80;
 
     volumeSlider.value = volume;
     volumeValue.textContent = `${volume}%`;

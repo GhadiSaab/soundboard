@@ -7,6 +7,7 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #287 | 11:57 AM | 🔵 | Volume slider hardcoded to 80% in HTML markup | ~322 |
 | #238 | 11:23 AM | 🟣 | PIN Settings Management UI | ~315 |
 | #237 | " | 🟣 | PIN Change Modal Added to Settings Page | ~344 |
 | #236 | 11:22 AM | 🟣 | PIN Security Settings UI Added to Settings Page | ~292 |
