@@ -69,11 +69,15 @@ router.post('/:id/play', async (req, res, next) => {
     }
 
     // Get playback mode from settings
-    const setting = db.prepare('SELECT value FROM settings WHERE key = ?').get('playback_mode');
-    const playbackMode = setting ? setting.value : 'queue';
+    const modeSetting = db.prepare('SELECT value FROM settings WHERE key = ?').get('playback_mode');
+    const playbackMode = modeSetting ? modeSetting.value : 'queue';
 
-    // Play the sound
-    await audioPlayer.play(sound.file_path, playbackMode);
+    // Get volume from settings
+    const volumeSetting = db.prepare('SELECT value FROM settings WHERE key = ?').get('volume');
+    const volume = volumeSetting ? parseInt(volumeSetting.value) : 80;
+
+    // Play the sound with volume
+    await audioPlayer.play(sound.file_path, playbackMode, volume);
 
     res.json({
       success: true,

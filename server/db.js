@@ -48,7 +48,10 @@ const insertDefaultSettings = db.prepare(`
 
 const defaultSettings = [
   ['playback_mode', 'queue'],
-  ['max_file_size', '10485760']
+  ['max_file_size', '10485760'],
+  ['volume', '80'],
+  ['pin_enabled', 'false'],
+  ['pin_code', '1234']
 ];
 
 for (const [key, value] of defaultSettings) {

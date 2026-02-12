@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const soundsRouter = require('./routes/sounds');
 const settingsRouter = require('./routes/settings');
+const pinRouter = require('./routes/pin');
 const errorHandler = require('./middleware/errorHandler');
 
 // Initialize database (this creates tables and default settings)
@@ -23,6 +24,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 // API Routes
 app.use('/api/sounds', soundsRouter);
 app.use('/api/settings', settingsRouter);
+app.use('/api/pin', pinRouter);
 
 // Root endpoint
 app.get('/api', (req, res) => {
@@ -32,7 +34,8 @@ app.get('/api', (req, res) => {
     version: '1.0.0',
     endpoints: {
       sounds: '/api/sounds',
-      settings: '/api/settings'
+      settings: '/api/settings',
+      pin: '/api/pin'
     }
   });
 });

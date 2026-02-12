@@ -166,6 +166,93 @@ body {
   gap: var(--spacing-sm);
 }
 
+/* === VOLUME CONTROL === */
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: var(--color-surface);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-brutal);
+  flex: 1;
+  max-width: 300px;
+}
+
+.volume-icon {
+  color: var(--color-text);
+  flex-shrink: 0;
+}
+
+.volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 12px;
+  background: var(--color-bg);
+  border: 3px solid var(--border-color);
+  border-radius: 6px;
+  outline: none;
+  cursor: pointer;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  background: var(--color-primary);
+  border: 3px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--border-color);
+  transition: all var(--transition-fast);
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+  background: var(--color-primary-dark);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--border-color);
+}
+
+.volume-slider::-webkit-slider-thumb:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--border-color);
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  background: var(--color-primary);
+  border: 3px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--border-color);
+  transition: all var(--transition-fast);
+}
+
+.volume-slider::-moz-range-thumb:hover {
+  background: var(--color-primary-dark);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--border-color);
+}
+
+.volume-slider::-moz-range-thumb:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--border-color);
+}
+
+.volume-value {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  min-width: 38px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
 /* === BUTTONS === */
 .btn-icon {
   width: 54px;
@@ -737,6 +824,18 @@ body {
 }
 
 /* === RESPONSIVE === */
+@media (max-width: 639px) {
+  .header-content {
+    flex-wrap: wrap;
+  }
+
+  .volume-control {
+    order: 3;
+    flex: 1 1 100%;
+    max-width: none;
+  }
+}
+
 @media (min-width: 640px) {
   .logo {
     font-size: 2.5rem;

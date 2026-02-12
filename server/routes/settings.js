@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const audioPlayer = require('../controllers/audioPlayer');
 
 // Get all settings
 router.get('/', (req, res, next) => {
@@ -45,7 +46,7 @@ router.get('/:key', (req, res, next) => {
 });
 
 // Update a setting
-router.put('/:key', (req, res, next) => {
+router.put('/:key', async (req, res, next) => {
   try {
     const { key } = req.params;
     const { value } = req.body;
@@ -79,6 +80,17 @@ router.put('/:key', (req, res, next) => {
       }
     }
 
+    // Validate volume values
+    if (key === 'volume') {
+      const numValue = parseInt(value);
+      if (isNaN(numValue) || numValue < 0 || numValue > 100) {
+        return res.status(400).json({
+          success: false,
+          error: 'Volume must be a number between 0 and 100'
+        });
+      }
+    }
+
     // Update or insert setting
     const updateSetting = db.prepare(`
       INSERT INTO settings (key, value) VALUES (?, ?)
@@ -88,6 +100,12 @@ router.put('/:key', (req, res, next) => {
     updateSetting.run(key, value, value);
 
     const setting = db.prepare('SELECT * FROM settings WHERE key = ?').get(key);
+
+    // Apply volume immediately if volume setting changed
+    if (key === 'volume') {
+      const volumeValue = parseInt(value);
+      await audioPlayer.setVolume(volumeValue);
+    }
 
     res.json({
       success: true,

@@ -298,6 +298,42 @@
         </div>
       </div>
 
+      <!-- PIN Security -->
+      <div class="setting-group">
+        <h2>Security</h2>
+        <p class="setting-description">Protect your sound board with a PIN</p>
+
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="pin_enabled" value="false">
+            <div class="radio-content">
+              <div class="radio-title">Disabled</div>
+              <div class="radio-description">
+                No PIN required to access the sound board.
+              </div>
+            </div>
+          </label>
+
+          <label class="radio-label">
+            <input type="radio" name="pin_enabled" value="true">
+            <div class="radio-content">
+              <div class="radio-title">Enabled</div>
+              <div class="radio-description">
+                Require a PIN to access the sound board.
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <button id="changePinBtn" class="btn-save" style="margin-top: var(--spacing-md); background: var(--color-secondary);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          Change PIN
+        </button>
+      </div>
+
       <button id="saveBtn" class="btn-save">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
@@ -312,6 +348,37 @@
     <div id="statusMessage" class="status-toast hidden">
       <span id="statusMessageText"></span>
     </div>
+
+    <!-- Change PIN Modal -->
+    <div id="changePinModal" class="modal hidden">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Change PIN</h3>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+          <div>
+            <label style="display: block; margin-bottom: var(--spacing-xs); font-weight: 600;">Current PIN</label>
+            <input type="password" id="currentPinInput" placeholder="Enter current PIN"
+                   style="width: 100%; padding: var(--spacing-sm); border: 3px solid var(--border-color); border-radius: var(--border-radius); font-family: var(--font-mono); font-size: 1.125rem; letter-spacing: 0.5rem;">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: var(--spacing-xs); font-weight: 600;">New PIN (4-6 digits)</label>
+            <input type="password" id="newPinInput" placeholder="Enter new PIN"
+                   style="width: 100%; padding: var(--spacing-sm); border: 3px solid var(--border-color); border-radius: var(--border-radius); font-family: var(--font-mono); font-size: 1.125rem; letter-spacing: 0.5rem;">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: var(--spacing-xs); font-weight: 600;">Confirm New PIN</label>
+            <input type="password" id="confirmPinInput" placeholder="Confirm new PIN"
+                   style="width: 100%; padding: var(--spacing-sm); border: 3px solid var(--border-color); border-radius: var(--border-radius); font-family: var(--font-mono); font-size: 1.125rem; letter-spacing: 0.5rem;">
+          </div>
+        </div>
+        <div class="modal-buttons" style="margin-top: var(--spacing-lg);">
+          <button id="cancelPinBtn" class="btn-modal btn-cancel">Cancel</button>
+          <button id="savePinBtn" class="btn-modal" style="background: var(--color-primary); color: white;">Save</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="/js/api.js"></script>
@@ -320,12 +387,20 @@
     async function loadSettings() {
       try {
         const data = await API.getSettings();
-        const playbackMode = data.settings.playback_mode || 'queue';
+        const settings = data.settings || {};
 
-        // Select the appropriate radio button
-        const radio = document.querySelector(`input[name="playback_mode"][value="${playbackMode}"]`);
-        if (radio) {
-          radio.checked = true;
+        const playbackMode = settings.playback_mode || 'queue';
+        const pinEnabled = settings.pin_enabled || 'false';
+
+        // Select the appropriate radio buttons
+        const playbackRadio = document.querySelector(`input[name="playback_mode"][value="${playbackMode}"]`);
+        if (playbackRadio) {
+          playbackRadio.checked = true;
+        }
+
+        const pinRadio = document.querySelector(`input[name="pin_enabled"][value="${pinEnabled}"]`);
+        if (pinRadio) {
+          pinRadio.checked = true;
         }
       } catch (error) {
         console.error('Error loading settings:', error);
@@ -337,17 +412,73 @@
     async function saveSettings() {
       try {
         const playbackMode = document.querySelector('input[name="playback_mode"]:checked')?.value;
+        const pinEnabled = document.querySelector('input[name="pin_enabled"]:checked')?.value;
 
         if (!playbackMode) {
           showStatus('Please select a playback mode', 'error');
           return;
         }
 
+        if (!pinEnabled) {
+          showStatus('Please select a PIN setting', 'error');
+          return;
+        }
+
         await API.updateSetting('playback_mode', playbackMode);
+        await API.updateSetting('pin_enabled', pinEnabled);
+
         showStatus('Settings saved successfully!', 'success');
+
+        // If PIN is now enabled, clear session storage to force re-authentication
+        if (pinEnabled === 'true') {
+          sessionStorage.removeItem('pin_verified');
+        }
       } catch (error) {
         console.error('Error saving settings:', error);
         showStatus('Error saving settings', 'error');
+      }
+    }
+
+    // Show/hide change PIN modal
+    function showChangePinModal() {
+      document.getElementById('changePinModal').classList.remove('hidden');
+      document.getElementById('currentPinInput').value = '';
+      document.getElementById('newPinInput').value = '';
+      document.getElementById('confirmPinInput').value = '';
+    }
+
+    function hideChangePinModal() {
+      document.getElementById('changePinModal').classList.add('hidden');
+    }
+
+    // Change PIN
+    async function changePin() {
+      const currentPin = document.getElementById('currentPinInput').value;
+      const newPin = document.getElementById('newPinInput').value;
+      const confirmPin = document.getElementById('confirmPinInput').value;
+
+      if (!currentPin || !newPin || !confirmPin) {
+        showStatus('Please fill in all fields', 'error');
+        return;
+      }
+
+      if (newPin !== confirmPin) {
+        showStatus('New PINs do not match', 'error');
+        return;
+      }
+
+      if (!/^\d{4,6}$/.test(newPin)) {
+        showStatus('PIN must be 4-6 digits', 'error');
+        return;
+      }
+
+      try {
+        await API.changePin(currentPin, newPin);
+        showStatus('PIN changed successfully!', 'success');
+        hideChangePinModal();
+      } catch (error) {
+        console.error('Error changing PIN:', error);
+        showStatus(error.message || 'Error changing PIN', 'error');
       }
     }
 
@@ -357,7 +488,7 @@
       const textEl = document.getElementById('statusMessageText');
 
       textEl.textContent = message;
-      statusEl.className = `status-message ${type}`;
+      statusEl.className = `status-toast ${type}`;
       statusEl.classList.remove('hidden');
 
       setTimeout(() => {
@@ -371,6 +502,16 @@
     });
 
     document.getElementById('saveBtn').addEventListener('click', saveSettings);
+    document.getElementById('changePinBtn').addEventListener('click', showChangePinModal);
+    document.getElementById('cancelPinBtn').addEventListener('click', hideChangePinModal);
+    document.getElementById('savePinBtn').addEventListener('click', changePin);
+
+    // Close modal on backdrop click
+    document.getElementById('changePinModal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget || e.target.classList.contains('modal-backdrop')) {
+        hideChangePinModal();
+      }
+    });
 
     // Load settings on page load
     loadSettings();

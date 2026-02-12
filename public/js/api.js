@@ -144,4 +144,31 @@ const API = {
       body: JSON.stringify({ value }),
     });
   },
+
+  /**
+   * Check if PIN protection is enabled
+   */
+  async checkPinEnabled() {
+    return this.request('/pin/enabled');
+  },
+
+  /**
+   * Verify PIN
+   */
+  async verifyPin(pin) {
+    return this.request('/pin/verify', {
+      method: 'POST',
+      body: JSON.stringify({ pin }),
+    });
+  },
+
+  /**
+   * Change PIN
+   */
+  async changePin(currentPin, newPin) {
+    return this.request('/pin/change', {
+      method: 'POST',
+      body: JSON.stringify({ currentPin, newPin }),
+    });
+  },
 };

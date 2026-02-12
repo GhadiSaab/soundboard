@@ -22,6 +22,14 @@
           <span class="logo-icon">🔊</span>
           <span class="logo-text">SOUND PAD</span>
         </h1>
+        <div class="volume-control">
+          <svg class="volume-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+          <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="80">
+          <span id="volumeValue" class="volume-value">80%</span>
+        </div>
         <div class="header-actions">
           <button id="stopBtn" class="btn-icon btn-stop" title="Stop All" aria-label="Stop All">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">

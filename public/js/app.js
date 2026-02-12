@@ -20,13 +20,41 @@ const confirmModal = document.getElementById('confirmModal');
 const confirmMessage = document.getElementById('confirmMessage');
 const confirmDelete = document.getElementById('confirmDelete');
 const confirmCancel = document.getElementById('confirmCancel');
+const volumeSlider = document.getElementById('volumeSlider');
+const volumeValue = document.getElementById('volumeValue');
 
 /**
  * Initialize the application
  */
 async function init() {
+  // Check PIN protection
+  await checkPinProtection();
+
   await loadSounds();
+  await loadVolume();
   setupEventListeners();
+}
+
+/**
+ * Check if PIN protection is enabled and user is authenticated
+ */
+async function checkPinProtection() {
+  try {
+    const response = await API.checkPinEnabled();
+
+    if (response.enabled) {
+      // Check if user is authenticated
+      const isAuthenticated = sessionStorage.getItem('pin_verified') === 'true';
+
+      if (!isAuthenticated) {
+        // Redirect to login page
+        window.location.href = '/login.html';
+        return;
+      }
+    }
+  } catch (error) {
+    console.error('Error checking PIN protection:', error);
+  }
 }
 
 /**
@@ -57,6 +85,23 @@ function setupEventListeners() {
       hideConfirmModal();
     }
   });
+
+  // Volume control
+  let volumeTimeout;
+  volumeSlider.addEventListener('input', (e) => {
+    const volume = e.target.value;
+    volumeValue.textContent = `${volume}%`;
+
+    // Debounce the API call
+    clearTimeout(volumeTimeout);
+    volumeTimeout = setTimeout(async () => {
+      try {
+        await API.updateSetting('volume', volume);
+      } catch (error) {
+        console.error('Error updating volume:', error);
+      }
+    }, 300);
+  });
 }
 
 /**
@@ -70,6 +115,23 @@ async function loadSounds() {
   } catch (error) {
     console.error('Error loading sounds:', error);
     showStatus('Error loading sounds', 'error');
+  }
+}
+
+/**
+ * Load volume setting
+ */
+async function loadVolume() {
+  try {
+    const data = await API.getSettings();
+    const settings = data.settings || [];
+    const volumeSetting = settings.find(s => s.key === 'volume');
+    const volume = volumeSetting ? parseInt(volumeSetting.value) : 80;
+
+    volumeSlider.value = volume;
+    volumeValue.textContent = `${volume}%`;
+  } catch (error) {
+    console.error('Error loading volume:', error);
   }
 }
 
