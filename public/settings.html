@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Settings - Sound Pad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Outfit:wght@400;500;600;700&family=Azeret+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    .settings-page {
+      animation: fadeInUp 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .settings-header {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .settings-title {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    .settings-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-secondary);
+      border: var(--border-width) solid var(--border-color);
+      border-radius: var(--border-radius);
+      color: white;
+      animation: rotate 4s linear infinite;
+    }
+
+    .settings-container {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .setting-group {
+      background: var(--color-surface);
+      border: var(--border-width) solid var(--border-color);
+      border-radius: var(--border-radius);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+      box-shadow: var(--shadow-brutal);
+    }
+
+    .setting-group h2 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      margin-bottom: var(--spacing-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .setting-description {
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-lg);
+      font-size: 1rem;
+    }
+
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+    }
+
+    .radio-label {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md);
+      background: var(--color-bg);
+      border: 3px solid var(--border-color);
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: all var(--transition-base);
+    }
+
+    .radio-label:hover {
+      background: var(--color-warning);
+      transform: translate(-2px, -2px);
+      box-shadow: 4px 4px 0 var(--border-color);
+    }
+
+    .radio-label input[type="radio"] {
+      appearance: none;
+      width: 28px;
+      height: 28px;
+      border: 3px solid var(--border-color);
+      border-radius: 50%;
+      background: var(--color-surface);
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      margin-top: 2px;
+      transition: all var(--transition-fast);
+    }
+
+    .radio-label input[type="radio"]:checked {
+      background: var(--color-primary);
+      border-color: var(--border-color);
+    }
+
+    .radio-label input[type="radio"]:checked::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 10px;
+      height: 10px;
+      background: white;
+      border-radius: 50%;
+      animation: checkPop 0.3s var(--bounce);
+    }
+
+    @keyframes checkPop {
+      0% {
+        transform: translate(-50%, -50%) scale(0);
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+
+    .radio-label input[type="radio"]:checked ~ .radio-content {
+      color: var(--color-text);
+    }
+
+    .radio-label input[type="radio"]:checked ~ .radio-content .radio-title {
+      color: var(--color-primary);
+    }
+
+    .radio-content {
+      flex: 1;
+    }
+
+    .radio-title {
+      font-weight: 700;
+      margin-bottom: var(--spacing-xs);
+      font-size: 1.125rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .radio-description {
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      line-height: 1.5;
+    }
+
+    .btn-save {
+      width: 100%;
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: var(--color-primary);
+      color: white;
+      border: var(--border-width) solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-family: var(--font-body);
+      font-size: 1.25rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      box-shadow: var(--shadow-brutal);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+    }
+
+    .btn-save:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: var(--shadow-brutal-hover);
+      background: var(--color-primary-dark);
+    }
+
+    .btn-save:active {
+      transform: translate(3px, 3px);
+      box-shadow: var(--shadow-brutal-active);
+    }
+
+    .status-toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: var(--spacing-md) var(--spacing-lg);
+      border: var(--border-width) solid var(--border-color);
+      border-radius: var(--border-radius);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      animation: slideUp 0.4s var(--bounce);
+      z-index: 1000;
+      box-shadow: var(--shadow-brutal);
+      min-width: 300px;
+      text-align: center;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    .status-toast.success {
+      background: var(--color-success);
+      color: white;
+    }
+
+    .status-toast.error {
+      background: var(--color-danger);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="noise-bg"></div>
+
+  <div class="container settings-page">
+    <!-- Header -->
+    <div class="settings-header">
+      <button id="backBtn" class="btn-icon" title="Back" aria-label="Back to home">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <h1 class="settings-title">
+        <div class="settings-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v6m0 6v6m8.66-15l-3 5.2M9.34 12.8l-3 5.2m12.66-5.2l-3-5.2M9.34 7.2l-3-5.2"/>
+          </svg>
+        </div>
+        Settings
+      </h1>
+    </div>
+
+    <!-- Settings Form -->
+    <div class="settings-container">
+      <div class="setting-group">
+        <h2>Playback Mode</h2>
+        <p class="setting-description">Choose how sounds behave when played</p>
+
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="playback_mode" value="queue">
+            <div class="radio-content">
+              <div class="radio-title">Queue Mode</div>
+              <div class="radio-description">
+                Sounds play one after another in order. New sounds are added to the end of the queue.
+              </div>
+            </div>
+          </label>
+
+          <label class="radio-label">
+            <input type="radio" name="playback_mode" value="interrupt">
+            <div class="radio-content">
+              <div class="radio-title">Interrupt Mode</div>
+              <div class="radio-description">
+                New sounds stop the current sound immediately and play right away.
+              </div>
+            </div>
+          </label>
+
+          <label class="radio-label">
+            <input type="radio" name="playback_mode" value="block">
+            <div class="radio-content">
+              <div class="radio-title">Block Mode</div>
+              <div class="radio-description">
+                Only one sound can play at a time. New sounds are rejected if one is already playing.
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <button id="saveBtn" class="btn-save">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+          <polyline points="7 3 7 8 15 8"/>
+        </svg>
+        Save Settings
+      </button>
+    </div>
+
+    <!-- Status Message -->
+    <div id="statusMessage" class="status-toast hidden">
+      <span id="statusMessageText"></span>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    // Load current settings
+    async function loadSettings() {
+      try {
+        const data = await API.getSettings();
+        const playbackMode = data.settings.playback_mode || 'queue';
+
+        // Select the appropriate radio button
+        const radio = document.querySelector(`input[name="playback_mode"][value="${playbackMode}"]`);
+        if (radio) {
+          radio.checked = true;
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error);
+        showStatus('Error loading settings', 'error');
+      }
+    }
+
+    // Save settings
+    async function saveSettings() {
+      try {
+        const playbackMode = document.querySelector('input[name="playback_mode"]:checked')?.value;
+
+        if (!playbackMode) {
+          showStatus('Please select a playback mode', 'error');
+          return;
+        }
+
+        await API.updateSetting('playback_mode', playbackMode);
+        showStatus('Settings saved successfully!', 'success');
+      } catch (error) {
+        console.error('Error saving settings:', error);
+        showStatus('Error saving settings', 'error');
+      }
+    }
+
+    // Show status message
+    function showStatus(message, type = 'success') {
+      const statusEl = document.getElementById('statusMessage');
+      const textEl = document.getElementById('statusMessageText');
+
+      textEl.textContent = message;
+      statusEl.className = `status-message ${type}`;
+      statusEl.classList.remove('hidden');
+
+      setTimeout(() => {
+        statusEl.classList.add('hidden');
+      }, 3000);
+    }
+
+    // Event listeners
+    document.getElementById('backBtn').addEventListener('click', () => {
+      window.location.href = '/';
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', saveSettings);
+
+    // Load settings on page load
+    loadSettings();
+  </script>
+</body>
+</html>
