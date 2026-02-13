@@ -54,7 +54,7 @@ router.patch('/:id', (req, res, next) => {
 router.delete('/:id', soundController.deleteSound);
 
 // Play a sound
-router.post('/:id/play', async (req, res, next) => {
+router.post('/:id/play', (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -76,8 +76,10 @@ router.post('/:id/play', async (req, res, next) => {
     const volumeSetting = db.prepare('SELECT value FROM settings WHERE key = ?').get('volume');
     const volume = volumeSetting ? parseInt(volumeSetting.value) : 80;
 
-    // Play the sound with volume
-    await audioPlayer.play(sound.file_path, playbackMode, volume);
+    // Start playback in background (don't await - respond immediately)
+    audioPlayer.play(sound.file_path, playbackMode, volume).catch(err => {
+      console.error('Playback error:', err.message);
+    });
 
     res.json({
       success: true,

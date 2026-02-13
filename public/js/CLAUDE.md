@@ -7,6 +7,7 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
-| #289 | 11:58 AM | 🔵 | API client provides getSettings method for retrieving all settings | ~331 |
+| #291 | 11:58 AM | 🔴 | Fixed volume slider initialization by correcting data structure handling | ~315 |
+| #289 | " | 🔵 | API client provides getSettings method for retrieving all settings | ~331 |
 | #288 | " | 🔵 | Volume initialization logic exists but executes in loadVolume function | ~382 |
 </claude-mem-context>
